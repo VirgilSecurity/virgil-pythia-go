@@ -3,20 +3,21 @@ package pythia
 type PasswordReq struct {
 	BlindedPassword []byte `json:"blinded_password"`
 	IncludeProof    bool   `json:"include_proof"`
-	Version         int    `json:"version"`
+	Version         int64  `json:"version"`
+	Salt            []byte `json:"salt"`
 }
 
 //
-// PasswordResp is model for get password response
+// PasswordResp is model for getting transform response
 //
 type PasswordResp struct {
 	TransformedPassword []byte `json:"transformed_password"`
-	Version             int    `json:"version"`
+	Version             int64  `json:"version"`
 	Proof               *Proof `json:"proof,omitempty"`
 }
 
 //
-// Proof contains all necessary parameters for proof of work
+// Proof contains all necessary parameters for transformation correctness
 //
 type Proof struct {
 	TransformationPublicKey []byte `json:"transformation_public_key"`

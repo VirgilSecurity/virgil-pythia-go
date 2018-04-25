@@ -8,18 +8,18 @@ import (
 	"gopkg.in/virgil.v5/errors"
 )
 
-type PythiaClient struct {
+type Client struct {
 	ServiceURL       string
 	VirgilHttpClient *common.VirgilHttpClient
 	HttpClient       common.HttpClient
 	once             sync.Once
 }
 
-func NewPythiaClient(serviceURL string) *PythiaClient {
-	return &PythiaClient{ServiceURL: serviceURL}
+func NewClient(serviceURL string) *Client {
+	return &Client{ServiceURL: serviceURL}
 }
 
-func (c *PythiaClient) ProtectPassword(blindedPassword []byte, includeProof bool, version int, token string) (*PasswordResp, error) {
+func (c *Client) ProtectPassword(salt, blindedPassword []byte, version int64, includeProof bool, token string) (*PasswordResp, error) {
 
 	req := &PasswordReq{
 		BlindedPassword: blindedPassword,
@@ -33,7 +33,7 @@ func (c *PythiaClient) ProtectPassword(blindedPassword []byte, includeProof bool
 	return resp, err
 }
 
-func (c *PythiaClient) send(method string, url string, token string, payload interface{}, respObj interface{}) (headers http.Header, err error) {
+func (c *Client) send(method string, url string, token string, payload interface{}, respObj interface{}) (headers http.Header, err error) {
 	client := c.getVirgilClient()
 	headers, err = client.Send(method, url, token, payload, respObj)
 	if err != nil {
@@ -45,21 +45,21 @@ func (c *PythiaClient) send(method string, url string, token string, payload int
 	return headers, nil
 }
 
-func (c *PythiaClient) getUrl() string {
+func (c *Client) getUrl() string {
 	if c.ServiceURL != "" {
 		return c.ServiceURL
 	}
 	return "https://api.virgilsecurity.com"
 }
 
-func (c *PythiaClient) getHttpClient() common.HttpClient {
+func (c *Client) getHttpClient() common.HttpClient {
 	if c.HttpClient != nil {
 		return c.HttpClient
 	}
 	return http.DefaultClient
 }
 
-func (c *PythiaClient) getVirgilClient() *common.VirgilHttpClient {
+func (c *Client) getVirgilClient() *common.VirgilHttpClient {
 
 	c.once.Do(func() {
 		if c.VirgilHttpClient == nil {

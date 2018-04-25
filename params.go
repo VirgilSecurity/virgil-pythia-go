@@ -1,20 +1,21 @@
 package pythia
 
+import "github.com/pkg/errors"
+
 type Params struct {
 	ApiKey, ApiKeyID, AppID string
 
-	proofKeys ProofKeys
+	ProofKeys []string
 }
 
 func MakeParams(apiKey, apiKeyId, appId string, proofKeys ...string) (*Params, error) {
 
-	keys, err := NewProofKeys(proofKeys...)
-	if err != nil {
-		return nil, err
+	if apiKey == "" || apiKeyId == "" || appId == "" || len(proofKeys) == 0 {
+		return nil, errors.New("not all parameters are set")
 	}
 
 	return &Params{
-		proofKeys: keys,
+		ProofKeys: proofKeys,
 		ApiKey:    apiKey,
 		ApiKeyID:  apiKeyId,
 		AppID:     appId,

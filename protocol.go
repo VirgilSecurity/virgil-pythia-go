@@ -25,6 +25,11 @@ type Protocol struct {
 
 func New(params *Params) (*Protocol, error) {
 
+	keys, err := NewProofKeys(params.ProofKeys...)
+	if err != nil {
+		return nil, err
+	}
+
 	client := NewClient("")
 
 	pythiaCrypto := pythia.New()
@@ -37,7 +42,6 @@ func New(params *Params) (*Protocol, error) {
 	}
 
 	generator := sdk.NewJwtGenerator(apiKey, params.ApiKeyID, virgil_crypto_go.NewVirgilAccessTokenSigner(), params.AppID, time.Hour)
-
 	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (string, error) {
 		jwt, err := generator.GenerateToken("pythia", nil)
 		if err != nil {
@@ -49,7 +53,7 @@ func New(params *Params) (*Protocol, error) {
 	return &Protocol{
 		AccessTokenProvider: accessTokenProvider,
 		Client:              client,
-		ProofKeys:           params.proofKeys,
+		ProofKeys:           keys,
 		Crypto:              pythiaCrypto,
 	}, nil
 }

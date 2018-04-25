@@ -19,7 +19,7 @@ func NewClient(serviceURL string) *Client {
 	return &Client{ServiceURL: serviceURL}
 }
 
-func (c *Client) ProtectPassword(salt, blindedPassword []byte, version int64, includeProof bool, token string) (*PasswordResp, error) {
+func (c *Client) ProtectPassword(salt, blindedPassword []byte, version uint, includeProof bool, token string) (*PasswordResp, error) {
 
 	req := &PasswordReq{
 		BlindedPassword: blindedPassword,

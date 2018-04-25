@@ -3,7 +3,7 @@ package pythia
 type PasswordReq struct {
 	BlindedPassword []byte `json:"blinded_password"`
 	IncludeProof    bool   `json:"include_proof"`
-	Version         int64  `json:"version"`
+	Version         uint   `json:"version"`
 	Salt            []byte `json:"salt"`
 }
 
@@ -12,7 +12,7 @@ type PasswordReq struct {
 //
 type PasswordResp struct {
 	TransformedPassword []byte `json:"transformed_password"`
-	Version             int64  `json:"version"`
+	Version             uint   `json:"version"`
 	Proof               *Proof `json:"proof,omitempty"`
 }
 

@@ -12,7 +12,7 @@ import (
 
 type ProofKey struct {
 	Key     []byte
-	Version int64
+	Version uint
 }
 
 type ProofKeys []*ProofKey
@@ -48,7 +48,7 @@ func NewProofKeys(proofKeys ...string) (ProofKeys, error) {
 	return keys, nil
 }
 
-func parseProofKey(pk string) (version int64, key []byte, err error) {
+func parseProofKey(pk string) (version uint, key []byte, err error) {
 	if pk == "" {
 		err = errors.New("key is empty")
 		return
@@ -67,16 +67,18 @@ func parseProofKey(pk string) (version int64, key []byte, err error) {
 		}
 	}
 
-	version, err = strconv.ParseInt(parts[0], 10, 32)
+	tmp, err := strconv.ParseInt(parts[0], 10, 32)
 	if err != nil {
 		return
 	}
 
-	key, err = base64.StdEncoding.DecodeString(parts[2])
+	version = uint(tmp)
+
+	key, err = base64.StdEncoding.DecodeString(parts[1])
 	return
 }
 
-func (t ProofKeys) Get(version int64) ([]byte, error) {
+func (t ProofKeys) Get(version uint) ([]byte, error) {
 
 	for _, pk := range t {
 		if pk.Version == version {

@@ -2,6 +2,7 @@ package pythia
 
 import (
 	"sync"
+	"time"
 
 	"crypto/subtle"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/VirgilSecurity/pythia-lib-go"
 	"gopkg.in/virgil.v5/errors"
 	"gopkg.in/virgil.v5/sdk"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
 type Protocol struct {
@@ -21,13 +23,35 @@ type Protocol struct {
 	paramsError                 error
 }
 
-func New(params *Params) *Protocol {
+func New(params *Params) (*Protocol, error) {
+
+	client := NewClient("")
+
+	pythiaCrypto := pythia.New()
+	crypto := virgil_crypto_go.NewVirgilCrypto()
+
+	apiKey, err := crypto.ImportPrivateKey([]byte(params.ApiKey), "")
+
+	if err != nil {
+		return nil, err
+	}
+
+	generator := sdk.NewJwtGenerator(apiKey, params.ApiKeyID, virgil_crypto_go.NewVirgilAccessTokenSigner(), params.AppID, time.Hour)
+
+	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (string, error) {
+		jwt, err := generator.GenerateToken("pythia", nil)
+		if err != nil {
+			return "", nil
+		}
+		return jwt.String(), nil
+	})
 
 	return &Protocol{
-		AccessTokenProvider: params.AccessTokenProvider,
-		Client:              params.Client,
+		AccessTokenProvider: accessTokenProvider,
+		Client:              client,
 		ProofKeys:           params.proofKeys,
-	}
+		Crypto:              pythiaCrypto,
+	}, nil
 }
 
 func (p *Protocol) Authenticate(password string, user *User, prove bool) (err error) {
@@ -119,7 +143,7 @@ func (p *Protocol) Register(password string) (*User, error) {
 	}, nil
 }
 
-func (p *Protocol) verify(protected *PasswordResp, version int64, blindedPassword, salt []byte) error {
+func (p *Protocol) verify(protected *PasswordResp, version uint, blindedPassword, salt []byte) error {
 	if protected.Proof == nil || protected.Proof.ValueC == nil || protected.Proof.ValueU == nil {
 		return errors.New("proof requested but was not received")
 	}

@@ -2,7 +2,6 @@ package pythia
 
 import (
 	"sync"
-	"time"
 
 	"crypto/subtle"
 
@@ -11,51 +10,24 @@ import (
 	"github.com/VirgilSecurity/pythia-lib-go"
 	"gopkg.in/virgil.v5/errors"
 	"gopkg.in/virgil.v5/sdk"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
 type Protocol struct {
-	AccessTokenProvider         sdk.AccessTokenProvider
-	Client                      *Client
-	onceClient, onceCheckParams sync.Once
-	ProofKeys                   ProofKeys
-	Crypto                      *pythia.Pythia
-	paramsError                 error
+	AccessTokenProvider sdk.AccessTokenProvider
+	Client              *Client
+	ProofKeys           ProofKeys
+	Crypto              *pythia.Pythia
+	onceClient          sync.Once
 }
 
-func New(params *Params) (*Protocol, error) {
-
-	keys, err := NewProofKeys(params.ProofKeys...)
-	if err != nil {
-		return nil, err
-	}
-
-	client := NewClient("")
-
-	pythiaCrypto := pythia.New()
-	crypto := virgil_crypto_go.NewVirgilCrypto()
-
-	apiKey, err := crypto.ImportPrivateKey([]byte(params.ApiKey), "")
-
-	if err != nil {
-		return nil, err
-	}
-
-	generator := sdk.NewJwtGenerator(apiKey, params.ApiKeyID, virgil_crypto_go.NewVirgilAccessTokenSigner(), params.AppID, time.Hour)
-	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (string, error) {
-		jwt, err := generator.GenerateToken("pythia", nil)
-		if err != nil {
-			return "", nil
-		}
-		return jwt.String(), nil
-	})
+func New(params *Params) *Protocol {
 
 	return &Protocol{
-		AccessTokenProvider: accessTokenProvider,
-		Client:              client,
-		ProofKeys:           keys,
-		Crypto:              pythiaCrypto,
-	}, nil
+		AccessTokenProvider: params.Provider,
+		Client:              params.Client,
+		ProofKeys:           params.ProofKeys,
+		Crypto:              params.Crypto,
+	}
 }
 
 func (p *Protocol) Authenticate(password string, user *User, prove bool) (err error) {
@@ -189,17 +161,12 @@ func (p *Protocol) userCheck(user *User) error {
 }
 
 func (c *Protocol) selfCheck() error {
-	c.onceCheckParams.Do(func() {
-		if c.Crypto == nil {
-			c.paramsError = errors.New("Crypto must be set")
-			return
-		}
+	if c.Crypto == nil {
+		return errors.New("Crypto must be set")
+	}
 
-		if c.AccessTokenProvider == nil {
-			c.paramsError = errors.New("AccessTokenProvider must be set")
-			return
-		}
-
-	})
-	return c.paramsError
+	if c.AccessTokenProvider == nil {
+		return errors.New("AccessTokenProvider must be set")
+	}
+	return nil
 }

@@ -60,8 +60,12 @@ func parseProofKey(pk string) (version uint, key []byte, err error) {
 		return
 	}
 
-	for _, p := range parts {
+	for i, p := range parts {
 		if p == "" {
+			err = errors.New("incorrect public key format")
+			return
+		}
+		if i == 1 && len(p) < 32 {
 			err = errors.New("incorrect public key format")
 			return
 		}

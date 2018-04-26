@@ -83,12 +83,15 @@ func parseProofKey(pk string) (version uint, key []byte, err error) {
 
 func (t ProofKeys) Get(version uint) ([]byte, error) {
 
-	for _, pk := range t {
-		if pk.Version == version {
-			return pk.Key, nil
-		}
+	i := sort.Search(len(t), func(i int) bool {
+		return t[i].Version <= version
+	})
+
+	if i >= len(t) || t[i].Version != version {
+		return nil, errors.New("proof key with such version not found")
 	}
-	return nil, errors.New("proof key with such version not found")
+
+	return t[i].Key, nil
 }
 
 func (t ProofKeys) GetCurrent() (*ProofKey, error) {

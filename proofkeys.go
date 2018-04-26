@@ -89,7 +89,7 @@ func (t ProofKeys) Get(version uint) ([]byte, error) {
 			return pk.Key, nil
 		}
 	}
-	return nil, errors.New("public key with such version not found")
+	return nil, errors.New("public key with such Version not found")
 }
 
 func (t ProofKeys) GetCurrent() (*ProofKey, error) {

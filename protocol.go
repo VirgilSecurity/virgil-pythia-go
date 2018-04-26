@@ -7,6 +7,8 @@ import (
 
 	"crypto/rand"
 
+	"encoding/base64"
+
 	"github.com/VirgilSecurity/pythia-lib-go"
 	"gopkg.in/virgil.v5/errors"
 	"gopkg.in/virgil.v5/sdk"
@@ -49,7 +51,7 @@ func (p *Protocol) Authenticate(password string, user *User, prove bool) (err er
 		return err
 	}
 
-	protected, err := p.getClient().ProtectPassword(user.Salt, blindedPassword, user.version, prove, token.String())
+	protected, err := p.getClient().ProtectPassword(user.Salt, blindedPassword, user.Version, prove, token.String())
 
 	if err != nil {
 		return err
@@ -57,7 +59,7 @@ func (p *Protocol) Authenticate(password string, user *User, prove bool) (err er
 
 	if prove {
 
-		if err := p.verify(protected, user.version, blindedPassword, user.Salt); err != nil {
+		if err := p.verify(protected, user.Version, blindedPassword, user.Salt); err != nil {
 			return err
 		}
 
@@ -114,8 +116,33 @@ func (p *Protocol) Register(password string) (*User, error) {
 
 	return &User{
 		Salt:              salt,
-		version:           proofKey.Version,
+		Version:           proofKey.Version,
 		DeblindedPassword: deblinded,
+	}, nil
+}
+
+func (p *Protocol) RotateSecret(newVersion uint, updateToken string, user *User) (*User, error) {
+	token, err := base64.StdEncoding.DecodeString(updateToken)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(token) < 10 || len(token) > 32 {
+		return nil, errors.New("invalid update token")
+	}
+
+	if err = p.userCheck(user); err != nil {
+		return nil, err
+	}
+
+	newDeblinded, err := p.Crypto.UpdateDeblindedWithToken(user.DeblindedPassword, token)
+	if err != nil {
+		return nil, err
+	}
+	return &User{
+		DeblindedPassword: newDeblinded,
+		Version:           newVersion,
+		Salt:              user.Salt,
 	}, nil
 }
 
@@ -160,12 +187,12 @@ func (p *Protocol) userCheck(user *User) error {
 	return nil
 }
 
-func (c *Protocol) selfCheck() error {
-	if c.Crypto == nil {
+func (p *Protocol) selfCheck() error {
+	if p.Crypto == nil {
 		return errors.New("Crypto must be set")
 	}
 
-	if c.AccessTokenProvider == nil {
+	if p.AccessTokenProvider == nil {
 		return errors.New("AccessTokenProvider must be set")
 	}
 	return nil

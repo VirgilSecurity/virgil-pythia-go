@@ -121,7 +121,12 @@ func (p *Protocol) Register(password string) (*User, error) {
 	}, nil
 }
 
-func (p *Protocol) RotateSecret(newVersion uint, updateToken string, user *User) (*User, error) {
+func (p *Protocol) RotateSecret(updateToken string, user *User) (*User, error) {
+
+	if err := p.selfCheck(); err != nil {
+		return nil, err
+	}
+
 	token, err := base64.StdEncoding.DecodeString(updateToken)
 	if err != nil {
 		return nil, err
@@ -135,13 +140,24 @@ func (p *Protocol) RotateSecret(newVersion uint, updateToken string, user *User)
 		return nil, err
 	}
 
+	if p.ProofKeys == nil {
+		return nil, errors.New("proof requested but ProofKeys is not set")
+	}
+
+	currentProofKey, err := p.ProofKeys.GetCurrent()
+
+	if err != nil {
+		return nil, err
+	}
+
 	newDeblinded, err := p.Crypto.UpdateDeblindedWithToken(user.DeblindedPassword, token)
 	if err != nil {
 		return nil, err
 	}
+
 	return &User{
 		DeblindedPassword: newDeblinded,
-		Version:           newVersion,
+		Version:           currentProofKey.Version,
 		Salt:              user.Salt,
 	}, nil
 }

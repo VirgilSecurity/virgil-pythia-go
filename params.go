@@ -39,12 +39,12 @@ func MakeParams(apiKey, apiKeyID, appID string, proofKeys ...string) (*Params, e
 	}
 
 	generator := sdk.NewJwtGenerator(apiPrivateKey, apiKeyID, virgil_crypto_go.NewVirgilAccessTokenSigner(), appID, time.Hour)
-	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (string, error) {
+	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (*sdk.Jwt, error) {
 		jwt, err := generator.GenerateToken("pythia", nil)
 		if err != nil {
-			return "", nil
+			return nil, err
 		}
-		return jwt.String(), nil
+		return jwt, nil
 	})
 
 	return &Params{

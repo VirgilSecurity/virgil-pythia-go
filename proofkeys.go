@@ -55,30 +55,29 @@ func parseProofKey(pk string) (version uint, key []byte, err error) {
 	}
 
 	parts := strings.Split(pk, ".")
-	if len(parts) != 2 {
+	if len(parts) != 3 {
 		err = errors.New("incorrect public key format")
 		return
 	}
 
-	for i, p := range parts {
-		if p == "" {
-			err = errors.New("incorrect public key format")
-			return
-		}
-		if i == 1 && len(p) < 32 {
-			err = errors.New("incorrect public key format")
-			return
-		}
+	if parts[0] != "PK" {
+		err = errors.New("incorrect public key format")
+		return
 	}
 
-	tmp, err := strconv.ParseInt(parts[0], 10, 32)
+	tmp, err := strconv.ParseUint(parts[1], 10, 32)
 	if err != nil {
 		return
 	}
 
 	version = uint(tmp)
 
-	key, err = base64.StdEncoding.DecodeString(parts[1])
+	if len(parts[2]) < 32 || len(parts[2]) > 70 {
+		err = errors.New("incorrect public key format")
+		return
+	}
+
+	key, err = base64.StdEncoding.DecodeString(parts[2])
 	return
 }
 

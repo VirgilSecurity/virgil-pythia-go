@@ -40,7 +40,7 @@ func CreateContext(apiKey, apiKeyID, appID string, proofKeys ...string) (*Contex
 
 	generator := sdk.NewJwtGenerator(apiPrivateKey, apiKeyID, virgil_crypto_go.NewVirgilAccessTokenSigner(), appID, time.Hour)
 	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (*sdk.Jwt, error) {
-		jwt, err := generator.GenerateToken("pythia", nil)
+		jwt, err := generator.GenerateToken("PYTHIA-CLIENT", nil)
 		if err != nil {
 			return nil, err
 		}

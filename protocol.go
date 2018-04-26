@@ -9,6 +9,9 @@ import (
 
 	"encoding/base64"
 
+	"strconv"
+	"strings"
+
 	"github.com/VirgilSecurity/pythia-lib-go"
 	"gopkg.in/virgil.v5/errors"
 	"gopkg.in/virgil.v5/sdk"
@@ -127,24 +130,22 @@ func (p *Protocol) UpdateUser(updateToken string, user *User) (*User, error) {
 		return nil, err
 	}
 
-	token, err := base64.StdEncoding.DecodeString(updateToken)
+	oldVersion, newVersion, token, err := parseToken(updateToken)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(token) < 10 || len(token) > 32 {
-		return nil, errors.New("invalid update token")
+	if user.Version == newVersion {
+		return nil, errors.New("this user has already been updated")
+	}
+
+	if user.Version != oldVersion {
+		return nil, errors.New("user's version does not match this update token")
 	}
 
 	if err = p.userCheck(user); err != nil {
 		return nil, err
 	}
-
-	if p.ProofKeys == nil {
-		return nil, errors.New("proof requested but ProofKeys is not set")
-	}
-
-	currentProofKey, err := p.ProofKeys.GetCurrent()
 
 	if err != nil {
 		return nil, err
@@ -157,9 +158,55 @@ func (p *Protocol) UpdateUser(updateToken string, user *User) (*User, error) {
 
 	return &User{
 		DeblindedPassword: newDeblinded,
-		Version:           currentProofKey.Version,
+		Version:           newVersion,
 		Salt:              user.Salt,
 	}, nil
+}
+
+func parseToken(s string) (oldVersion uint, newVersion uint, token []byte, err error) {
+	if s == "" {
+		err = errors.New("key is empty")
+		return
+	}
+
+	parts := strings.Split(s, ".")
+	if len(parts) != 4 {
+		err = errors.New("incorrect update token format")
+		return
+	}
+
+	if parts[0] != "UT" {
+		err = errors.New("incorrect update token format")
+		return
+	}
+
+	tmp, err := strconv.ParseUint(parts[1], 10, 32)
+	if err != nil {
+		err = errors.New("incorrect update token format")
+		return
+	}
+
+	oldVersion = uint(tmp)
+
+	tmp, err = strconv.ParseUint(parts[2], 10, 32)
+	if err != nil {
+		err = errors.New("incorrect update token format")
+		return
+	}
+
+	newVersion = uint(tmp)
+
+	if len(parts[3]) < 32 || len(parts[3]) > 70 {
+		err = errors.New("incorrect update token format")
+		return
+	}
+
+	token, err = base64.StdEncoding.DecodeString(parts[2])
+	if err != nil {
+		err = errors.New("incorrect update token format")
+		return
+	}
+	return
 }
 
 func (p *Protocol) verify(protected *PasswordResp, version uint, blindedPassword, salt []byte) error {

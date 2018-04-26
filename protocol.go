@@ -121,7 +121,7 @@ func (p *Protocol) Register(password string) (*User, error) {
 	}, nil
 }
 
-func (p *Protocol) RotateSecret(updateToken string, user *User) (*User, error) {
+func (p *Protocol) UpdateUser(updateToken string, user *User) (*User, error) {
 
 	if err := p.selfCheck(); err != nil {
 		return nil, err

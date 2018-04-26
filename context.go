@@ -9,14 +9,14 @@ import (
 	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
 )
 
-type Params struct {
+type Context struct {
 	Provider  sdk.AccessTokenProvider
 	Client    *Client
 	Crypto    *pythia.Pythia
 	ProofKeys ProofKeys
 }
 
-func MakeParams(apiKey, apiKeyID, appID string, proofKeys ...string) (*Params, error) {
+func CreateContext(apiKey, apiKeyID, appID string, proofKeys ...string) (*Context, error) {
 
 	if apiKey == "" || apiKeyID == "" || appID == "" || len(proofKeys) == 0 {
 		return nil, errors.New("all parameters are mandatory")
@@ -47,7 +47,7 @@ func MakeParams(apiKey, apiKeyID, appID string, proofKeys ...string) (*Params, e
 		return jwt, nil
 	})
 
-	return &Params{
+	return &Context{
 		ProofKeys: keys,
 		Client:    client,
 		Crypto:    pythiaCrypto,

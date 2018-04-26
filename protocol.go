@@ -22,7 +22,7 @@ type Protocol struct {
 	onceClient          sync.Once
 }
 
-func New(params *Params) *Protocol {
+func New(params *Context) *Protocol {
 
 	return &Protocol{
 		AccessTokenProvider: params.Provider,

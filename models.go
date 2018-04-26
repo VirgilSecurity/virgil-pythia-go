@@ -20,7 +20,6 @@ type PasswordResp struct {
 // Proof contains all necessary parameters for transformation correctness
 //
 type Proof struct {
-	TransformationPublicKey []byte `json:"transformation_public_key"`
-	ValueC                  []byte `json:"value_c"`
-	ValueU                  []byte `json:"value_u"`
+	ValueC []byte `json:"value_c"`
+	ValueU []byte `json:"value_u"`
 }

@@ -50,18 +50,18 @@ func NewProofKeys(proofKeys ...string) (ProofKeys, error) {
 
 func parseProofKey(pk string) (version uint, key []byte, err error) {
 	if pk == "" {
-		err = errors.New("key is empty")
+		err = errors.New("proof key is empty")
 		return
 	}
 
 	parts := strings.Split(pk, ".")
 	if len(parts) != 3 {
-		err = errors.New("incorrect public key format")
+		err = errors.New("incorrect proof key format")
 		return
 	}
 
 	if parts[0] != "PK" {
-		err = errors.New("incorrect public key format")
+		err = errors.New("incorrect proof key format")
 		return
 	}
 
@@ -73,7 +73,7 @@ func parseProofKey(pk string) (version uint, key []byte, err error) {
 	version = uint(tmp)
 
 	if len(parts[2]) < 32 || len(parts[2]) > 70 {
-		err = errors.New("incorrect public key format")
+		err = errors.New("incorrect proof key format")
 		return
 	}
 
@@ -88,7 +88,7 @@ func (t ProofKeys) Get(version uint) ([]byte, error) {
 			return pk.Key, nil
 		}
 	}
-	return nil, errors.New("public key with such Version not found")
+	return nil, errors.New("proof key with such version not found")
 }
 
 func (t ProofKeys) GetCurrent() (*ProofKey, error) {
@@ -98,7 +98,7 @@ func (t ProofKeys) GetCurrent() (*ProofKey, error) {
 	}
 
 	if t[0] == nil || len(t[0].Key) == 0 {
-		return nil, errors.New("current proof key is incorrect")
+		return nil, errors.New("current proof key is invalid")
 	}
 
 	return t[0], nil

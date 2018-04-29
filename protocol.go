@@ -106,7 +106,9 @@ func (p *Protocol) Register(password string) (*User, error) {
 	}
 
 	protected, err := p.getClient().ProtectPassword(salt, blindedPassword, proofKey.Version, true, token.String())
-
+	if err != nil {
+		return nil, err
+	}
 	if err := p.verify(protected, proofKey.Version, blindedPassword, salt); err != nil {
 		return nil, err
 	}

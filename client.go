@@ -25,10 +25,11 @@ func (c *Client) ProtectPassword(salt, blindedPassword []byte, version uint, inc
 		BlindedPassword: blindedPassword,
 		IncludeProof:    includeProof,
 		Version:         version,
+		Salt:            salt,
 	}
 
 	var resp *PasswordResp
-	_, err := c.send(http.MethodPost, "pythia/v1/password", token, req, &resp)
+	_, err := c.send(http.MethodPost, "/pythia/v1/password", token, req, &resp)
 
 	return resp, err
 }

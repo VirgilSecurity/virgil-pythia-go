@@ -8,10 +8,10 @@ import (
 
 func TestNewProofKeys(t *testing.T) {
 	keys, err := NewProofKeys(
-		"PK.5.AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==",
-		"PK.1.AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==",
+		"PK.5.AgTn2njhhYeI94f/Ci20djo7+MgtfMt18ZjMjBAG3DYhzljZlugXWHkMucOWn20MLA==",
+		"PK.1.AgTn2njhhYeI94f/Ci20djo7+MgtfMt18ZjMjBAG3DYhzljZlugXWHkMucOWn20MLA==",
 		"PK.2.AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==",
-		"PK.4.AgwhFXaYR7EWiTxeCCj269+cZKcRiT7x2Ifbyi4HrMnpSCapaoUzoK8rIJSNJC++jA==")
+		"PK.4.AgTn2njhhYeI94f/Ci20djo7+MgtfMt18ZjMjBAG3DYhzljZlugXWHkMucOWn20MLA==")
 	assert.NoError(t, err)
 
 	current, err := keys.GetCurrent()

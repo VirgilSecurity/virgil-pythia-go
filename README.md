@@ -3,7 +3,7 @@
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 
 
-[Introduction](#introduction) | [SDK Features](#sdk-features) | [Installation](#installation) | [Usage Examples](#usage-examples) | [Docs](#docs) | [Support](#support)
+[Introduction](#introduction) | [SDK Features](#sdk-features) | [Install and configure SDK](#install-and-configure-sdk) | [Usage Examples](#usage-examples) | [Docs](#docs) | [Support](#support)
 
 ## Introduction
 
@@ -15,7 +15,7 @@
 - create, verify and update user's breach-proof password
 - use Virgil [Crypto Pythia library][_virgil_crypto_pythia]
 
-## Installation
+## Install and configure SDK
 
 The Virgil Pythia Go SDK is provided as a package named pythia-go. The package is distributed via GitHub.
 The package is available for Go 1.10 or newer.
@@ -176,7 +176,7 @@ if err != nil{
 
 The difference between the `VerifyBreachProofPassword` and `CreateBreachProofPassword` functions is that the verification of Pythia Service is optional in `VerifyBreachProofPassword` function, which allows you to achieve maximum performance when processing data. You can turn on a proof step in `VerifyBreachProofPassword` function if you have any suspicions that a user or Pythia Service were compromised.
 
-##№ Update breach-proof passwords
+### Update breach-proof passwords
 
 This step will allow you to use an `updateToken` in order to update users' breach-proof passwords in your database.
 

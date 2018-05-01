@@ -25,7 +25,7 @@ func (c *Client) ProtectPassword(salt, blindedPassword []byte, version uint, inc
 		BlindedPassword: blindedPassword,
 		IncludeProof:    includeProof,
 		Version:         version,
-		Salt:            salt,
+		UserId:          salt,
 	}
 
 	var resp *PasswordResp

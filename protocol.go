@@ -35,7 +35,7 @@ func New(params *Context) *Protocol {
 	}
 }
 
-func (p *Protocol) Authenticate(password string, user *User, prove bool) (err error) {
+func (p *Protocol) VerifyBreachProofPassword(password string, user *User, prove bool) (err error) {
 	if err := p.selfCheck(); err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (p *Protocol) Authenticate(password string, user *User, prove bool) (err er
 	return nil
 }
 
-func (p *Protocol) Register(password string) (*User, error) {
+func (p *Protocol) CreateBreachProofPassword(password string) (*User, error) {
 	if err := p.selfCheck(); err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (p *Protocol) Register(password string) (*User, error) {
 	}, nil
 }
 
-func (p *Protocol) UpdateUser(updateToken string, user *User) (*User, error) {
+func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *User) (*User, error) {
 
 	if err := p.selfCheck(); err != nil {
 		return nil, err

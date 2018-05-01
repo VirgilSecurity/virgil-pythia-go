@@ -4,7 +4,7 @@ type PasswordReq struct {
 	BlindedPassword []byte `json:"blinded_password"`
 	IncludeProof    bool   `json:"include_proof"`
 	Version         uint   `json:"version"`
-	Salt            []byte `json:"salt"`
+	UserId          []byte `json:"user_id"`
 }
 
 //

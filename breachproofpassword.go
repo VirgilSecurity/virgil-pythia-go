@@ -1,6 +1,6 @@
 package pythia
 
-type User struct {
+type BreachProofPassword struct {
 	Salt, DeblindedPassword []byte
 	Version                 uint
 }

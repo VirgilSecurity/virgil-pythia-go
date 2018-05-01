@@ -35,7 +35,7 @@ func New(params *Context) *Protocol {
 	}
 }
 
-func (p *Protocol) VerifyBreachProofPassword(password string, user *User, prove bool) (err error) {
+func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofPassword, prove bool) (err error) {
 	if err := p.selfCheck(); err != nil {
 		return err
 	}
@@ -81,7 +81,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *User, prove 
 	return nil
 }
 
-func (p *Protocol) CreateBreachProofPassword(password string) (*User, error) {
+func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassword, error) {
 	if err := p.selfCheck(); err != nil {
 		return nil, err
 	}
@@ -119,14 +119,14 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*User, error) {
 		return nil, err
 	}
 
-	return &User{
+	return &BreachProofPassword{
 		Salt:              salt,
 		Version:           proofKey.Version,
 		DeblindedPassword: deblinded,
 	}, nil
 }
 
-func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *User) (*User, error) {
+func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachProofPassword) (*BreachProofPassword, error) {
 
 	if err := p.selfCheck(); err != nil {
 		return nil, err
@@ -158,7 +158,7 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *User) (*U
 		return nil, err
 	}
 
-	return &User{
+	return &BreachProofPassword{
 		DeblindedPassword: newDeblinded,
 		Version:           newVersion,
 		Salt:              user.Salt,
@@ -242,7 +242,7 @@ func (c *Protocol) getClient() *Client {
 	return c.Client
 }
 
-func (p *Protocol) userCheck(user *User) error {
+func (p *Protocol) userCheck(user *BreachProofPassword) error {
 	if user == nil {
 		return errors.New("user is nil")
 	}

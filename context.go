@@ -3,10 +3,10 @@ package pythia
 import (
 	"time"
 
-	"github.com/VirgilSecurity/pythia-lib-go"
 	"github.com/pkg/errors"
 	"gopkg.in/virgil.v5/sdk"
 	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5/pythia"
 )
 
 type Context struct {

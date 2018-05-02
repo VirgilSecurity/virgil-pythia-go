@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/VirgilSecurity/pythia-lib-go"
 	"gopkg.in/virgil.v5/errors"
 	"gopkg.in/virgil.v5/sdk"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5/pythia"
 )
 
 type Protocol struct {
@@ -109,6 +109,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 	if err != nil {
 		return nil, err
 	}
+
 	if err := p.verify(protected, proofKey.Version, blindedPassword, salt); err != nil {
 		return nil, err
 	}

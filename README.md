@@ -52,7 +52,7 @@ and then install the library:
 ```bash
 go get -u -d gopkg.in/virgilsecurity/virgil-crypto-go.v5
 wget https://cdn.virgilsecurity.com/crypto-go/$CRYPTO_LIB
-tar -xvf $CRYPTO_LIB --strip-components=1 -C cd $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/
+tar -xvf $CRYPTO_LIB --strip-components=1 -C $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/
 ```
 
 #### Step #2. Installing Virgil Pythia Go package

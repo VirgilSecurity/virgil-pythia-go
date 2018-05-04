@@ -159,10 +159,13 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachPro
 		return nil, err
 	}
 
+	newSalt := make([]byte, len(user.Salt))
+	copy(newSalt, user.Salt)
+
 	return &BreachProofPassword{
 		DeblindedPassword: newDeblinded,
 		Version:           newVersion,
-		Salt:              user.Salt,
+		Salt:              newSalt,
 	}, nil
 }
 

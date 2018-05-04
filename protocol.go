@@ -204,7 +204,7 @@ func parseToken(s string) (oldVersion uint, newVersion uint, token []byte, err e
 		return
 	}
 
-	token, err = base64.StdEncoding.DecodeString(parts[2])
+	token, err = base64.StdEncoding.DecodeString(parts[3])
 	if err != nil {
 		err = errors.New("incorrect update token format")
 		return

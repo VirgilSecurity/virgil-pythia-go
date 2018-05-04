@@ -21,7 +21,7 @@ type Protocol struct {
 	AccessTokenProvider sdk.AccessTokenProvider
 	Client              *Client
 	ProofKeys           ProofKeys
-	Crypto              *pythia.Pythia
+	Pythia              *pythia.Pythia
 	onceClient          sync.Once
 }
 
@@ -31,7 +31,7 @@ func New(params *Context) *Protocol {
 		AccessTokenProvider: params.Provider,
 		Client:              params.Client,
 		ProofKeys:           params.ProofKeys,
-		Crypto:              params.Crypto,
+		Pythia:              params.Crypto,
 	}
 }
 
@@ -49,7 +49,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofP
 		return err
 	}
 
-	blindedPassword, secret, err := p.Crypto.Blind([]byte(password))
+	blindedPassword, secret, err := p.Pythia.Blind([]byte(password))
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofP
 
 	}
 
-	deblinded, err := p.Crypto.Deblind(protected.TransformedPassword, secret)
+	deblinded, err := p.Pythia.Deblind(protected.TransformedPassword, secret)
 
 	if err != nil {
 		return err
@@ -95,7 +95,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 		return nil, err
 	}
 
-	blindedPassword, secret, err := p.Crypto.Blind([]byte(password))
+	blindedPassword, secret, err := p.Pythia.Blind([]byte(password))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 		return nil, err
 	}
 
-	deblinded, err := p.Crypto.Deblind(protected.TransformedPassword, secret)
+	deblinded, err := p.Pythia.Deblind(protected.TransformedPassword, secret)
 
 	if err != nil {
 		return nil, err
@@ -154,7 +154,7 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachPro
 		return nil, err
 	}
 
-	newDeblinded, err := p.Crypto.UpdateDeblindedWithToken(user.DeblindedPassword, token)
+	newDeblinded, err := p.Pythia.UpdateDeblindedWithToken(user.DeblindedPassword, token)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +229,7 @@ func (p *Protocol) verify(protected *PasswordResp, version uint, blindedPassword
 		return err
 	}
 
-	err = p.Crypto.Verify(protected.TransformedPassword, blindedPassword, salt, proofKey, protected.Proof.ValueC, protected.Proof.ValueU)
+	err = p.Pythia.Verify(protected.TransformedPassword, blindedPassword, salt, proofKey, protected.Proof.ValueC, protected.Proof.ValueU)
 	if err != nil {
 		return errors.New("value verification failed")
 	}
@@ -257,8 +257,8 @@ func (p *Protocol) userCheck(user *BreachProofPassword) error {
 }
 
 func (p *Protocol) selfCheck() error {
-	if p.Crypto == nil {
-		return errors.New("Crypto must be set")
+	if p.Pythia == nil {
+		return errors.New("Pythia must be set")
 	}
 
 	if p.AccessTokenProvider == nil {

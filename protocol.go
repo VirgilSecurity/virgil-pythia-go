@@ -43,7 +43,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofP
 	if err := p.userCheck(user); err != nil {
 		return err
 	}
-	tokenContext := &sdk.TokenContext{Identity: "", Operation: "protect"}
+	tokenContext := &sdk.TokenContext{Identity: "", Operation: "verify", Service: "Pythia"}
 	token, err := p.AccessTokenProvider.GetToken(tokenContext)
 	if err != nil {
 		return err
@@ -89,7 +89,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 	salt := make([]byte, 32)
 	rand.Read(salt)
 
-	tokenContext := &sdk.TokenContext{Identity: "", Operation: "protect", Service: "Pythia"}
+	tokenContext := &sdk.TokenContext{Identity: "", Operation: "register", Service: "Pythia"}
 	token, err := p.AccessTokenProvider.GetToken(tokenContext)
 	if err != nil {
 		return nil, err

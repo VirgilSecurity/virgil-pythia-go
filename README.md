@@ -171,7 +171,7 @@ Use this flow when a user already has his or her own breach-proof password in yo
 err = pythia.VerifyBreachProofPassword("USER_PASSWORD", pwd, false)
 
 if err != nil{
-//authentication failed
+//authentication failed ot throttle reached
 }
 ```
 

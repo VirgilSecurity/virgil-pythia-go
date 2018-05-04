@@ -64,7 +64,7 @@ go get -u github.com/VirgilSecurity/pythia-go
 ```
 
 ### Configure SDK
-When you create a Pythia Application on the [Virgil Dashboard](_dashboard) you will receive Application credentials including: Proof Key and App ID. Specify your Pythia Application and Virgil account credentials in a Pythia SDK class instance.
+When you create a Pythia Application on the [Virgil Dashboard](https://dashboard.virgilsecurity.com/) you will receive Application credentials including: Proof Key and App ID. Specify your Pythia Application and Virgil account credentials in a Pythia SDK class instance.
 These credentials are used for the following purposes:
 - generating a JWT token that is used for authorization on the Virgil Services
 - creating a user's breach-proof password
@@ -211,7 +211,7 @@ Virgil Security has a powerful set of APIs, and the documentation below can get 
 
 ## License
 
-This library is released under the [3-clause BSD License](LICENSE.md).
+This library is released under the [3-clause BSD License](LICENSE).
 
 ## Support
 Our developer support team is here to help you. Find out more information on our [Help Center](https://help.virgilsecurity.com/).

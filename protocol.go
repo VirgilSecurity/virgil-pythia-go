@@ -1,3 +1,35 @@
+/*
+ * BSD 3-Clause License
+ *
+ * Copyright (c) 2015-2018, Virgil Security, Inc.
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ *  Redistributions of source code must retain the above copyright notice, this
+ *   list of conditions and the following disclaimer.
+ *
+ *  Redistributions in binary form must reproduce the above copyright notice,
+ *   this list of conditions and the following disclaimer in the documentation
+ *   and/or other materials provided with the distribution.
+ *
+ *  Neither the name of the copyright holder nor the names of its
+ *   contributors may be used to endorse or promote products derived from
+ *   this software without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
 package pythia
 
 import (
@@ -21,7 +53,7 @@ type Protocol struct {
 	AccessTokenProvider sdk.AccessTokenProvider
 	Client              *Client
 	ProofKeys           ProofKeys
-	Crypto              *pythia.Pythia
+	Pythia              *pythia.Pythia
 	onceClient          sync.Once
 }
 
@@ -31,30 +63,30 @@ func New(params *Context) *Protocol {
 		AccessTokenProvider: params.Provider,
 		Client:              params.Client,
 		ProofKeys:           params.ProofKeys,
-		Crypto:              params.Crypto,
+		Pythia:              params.Crypto,
 	}
 }
 
-func (p *Protocol) VerifyBreachProofPassword(password string, pwd *BreachProofPassword, prove bool) (err error) {
+func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofPassword, prove bool) (err error) {
 	if err := p.selfCheck(); err != nil {
 		return err
 	}
 
-	if err := p.pwdCheck(pwd); err != nil {
+	if err := p.userCheck(user); err != nil {
 		return err
 	}
-	tokenContext := &sdk.TokenContext{Identity: "", Operation: "protect"}
+	tokenContext := &sdk.TokenContext{Identity: "", Operation: "verify", Service: "Pythia"}
 	token, err := p.AccessTokenProvider.GetToken(tokenContext)
 	if err != nil {
 		return err
 	}
 
-	blindedPassword, secret, err := p.Crypto.Blind([]byte(password))
+	blindedPassword, secret, err := p.Pythia.Blind([]byte(password))
 	if err != nil {
 		return err
 	}
 
-	protected, err := p.getClient().ProtectPassword(pwd.Salt, blindedPassword, pwd.Version, prove, token.String())
+	protected, err := p.getClient().ProtectPassword(user.Salt, blindedPassword, user.Version, prove, token.String())
 
 	if err != nil {
 		return err
@@ -62,19 +94,19 @@ func (p *Protocol) VerifyBreachProofPassword(password string, pwd *BreachProofPa
 
 	if prove {
 
-		if err := p.verify(protected, pwd.Version, blindedPassword, pwd.Salt); err != nil {
+		if err := p.verify(protected, user.Version, blindedPassword, user.Salt); err != nil {
 			return err
 		}
 
 	}
 
-	deblinded, err := p.Crypto.Deblind(protected.TransformedPassword, secret)
+	deblinded, err := p.Pythia.Deblind(protected.TransformedPassword, secret)
 
 	if err != nil {
 		return err
 	}
 
-	if subtle.ConstantTimeCompare(deblinded, pwd.DeblindedPassword) != 1 {
+	if subtle.ConstantTimeCompare(deblinded, user.DeblindedPassword) != 1 {
 		return errors.New("authentication failed")
 	}
 
@@ -89,13 +121,13 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 	salt := make([]byte, 32)
 	rand.Read(salt)
 
-	tokenContext := &sdk.TokenContext{Identity: "", Operation: "protect", Service: "Pythia"}
+	tokenContext := &sdk.TokenContext{Identity: "", Operation: "register", Service: "Pythia"}
 	token, err := p.AccessTokenProvider.GetToken(tokenContext)
 	if err != nil {
 		return nil, err
 	}
 
-	blindedPassword, secret, err := p.Crypto.Blind([]byte(password))
+	blindedPassword, secret, err := p.Pythia.Blind([]byte(password))
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +146,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 		return nil, err
 	}
 
-	deblinded, err := p.Crypto.Deblind(protected.TransformedPassword, secret)
+	deblinded, err := p.Pythia.Deblind(protected.TransformedPassword, secret)
 
 	if err != nil {
 		return nil, err
@@ -127,7 +159,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 	}, nil
 }
 
-func (p *Protocol) UpdateBreachProofPassword(updateToken string, pwd *BreachProofPassword) (*BreachProofPassword, error) {
+func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachProofPassword) (*BreachProofPassword, error) {
 
 	if err := p.selfCheck(); err != nil {
 		return nil, err
@@ -138,15 +170,15 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, pwd *BreachProo
 		return nil, err
 	}
 
-	if pwd.Version == newVersion {
-		return nil, errors.New("this pwd has already been updated")
+	if user.Version == newVersion {
+		return nil, errors.New("this user has already been updated")
 	}
 
-	if pwd.Version != oldVersion {
-		return nil, errors.New("pwd's version does not match this update token")
+	if user.Version != oldVersion {
+		return nil, errors.New("user's version does not match this update token")
 	}
 
-	if err = p.pwdCheck(pwd); err != nil {
+	if err = p.userCheck(user); err != nil {
 		return nil, err
 	}
 
@@ -154,15 +186,18 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, pwd *BreachProo
 		return nil, err
 	}
 
-	newDeblinded, err := p.Crypto.UpdateDeblindedWithToken(pwd.DeblindedPassword, token)
+	newDeblinded, err := p.Pythia.UpdateDeblindedWithToken(user.DeblindedPassword, token)
 	if err != nil {
 		return nil, err
 	}
+
+	newSalt := make([]byte, len(user.Salt))
+	copy(newSalt, user.Salt)
 
 	return &BreachProofPassword{
 		DeblindedPassword: newDeblinded,
 		Version:           newVersion,
-		Salt:              pwd.Salt,
+		Salt:              newSalt,
 	}, nil
 }
 
@@ -204,7 +239,7 @@ func parseToken(s string) (oldVersion uint, newVersion uint, token []byte, err e
 		return
 	}
 
-	token, err = base64.StdEncoding.DecodeString(parts[2])
+	token, err = base64.StdEncoding.DecodeString(parts[3])
 	if err != nil {
 		err = errors.New("incorrect update token format")
 		return
@@ -226,7 +261,7 @@ func (p *Protocol) verify(protected *PasswordResp, version uint, blindedPassword
 		return err
 	}
 
-	err = p.Crypto.Verify(protected.TransformedPassword, blindedPassword, salt, proofKey, protected.Proof.ValueC, protected.Proof.ValueU)
+	err = p.Pythia.Verify(protected.TransformedPassword, blindedPassword, salt, proofKey, protected.Proof.ValueC, protected.Proof.ValueU)
 	if err != nil {
 		return errors.New("value verification failed")
 	}
@@ -243,19 +278,19 @@ func (c *Protocol) getClient() *Client {
 	return c.Client
 }
 
-func (p *Protocol) pwdCheck(pwd *BreachProofPassword) error {
-	if pwd == nil {
-		return errors.New("pwd is nil")
+func (p *Protocol) userCheck(user *BreachProofPassword) error {
+	if user == nil {
+		return errors.New("user is nil")
 	}
-	if len(pwd.Salt) == 0 || len(pwd.DeblindedPassword) == 0 {
-		return errors.New("pwd object does not have salt or deblindedPassword set")
+	if len(user.Salt) == 0 || len(user.DeblindedPassword) == 0 {
+		return errors.New("user object does not have salt or deblindedPassword set")
 	}
 	return nil
 }
 
 func (p *Protocol) selfCheck() error {
-	if p.Crypto == nil {
-		return errors.New("Crypto must be set")
+	if p.Pythia == nil {
+		return errors.New("Pythia must be set")
 	}
 
 	if p.AccessTokenProvider == nil {

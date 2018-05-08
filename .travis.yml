@@ -9,9 +9,9 @@ env:
     - SWIG_VERSION=3.0.12
 
 before_install:
- - whereis cmake
  - wget -O cmake.sh https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.sh
  - sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
+ - sudo cp /usr/local/bin/cmake /usr/local/cmake
  - wget http://downloads.sourceforge.net/swig/swig-${SWIG_VERSION}.tar.gz
  - tar -xzf swig-${SWIG_VERSION}.tar.gz
  - cd swig-${SWIG_VERSION}

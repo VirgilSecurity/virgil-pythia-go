@@ -1,5 +1,5 @@
 # Virgil Pythia Go SDK
-[![Build Status](https://travis-ci.org/go-virgil/virgil.png?branch=v5)](https://travis-ci.org/go-virgil/virgil)
+[![Build Status](https://travis-ci.org/VirgilSecurity/pythia-go.png?branch=master)](https://travis-ci.org/VirgilSecurity/pythia-go)
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 
 

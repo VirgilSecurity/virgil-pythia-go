@@ -1,6 +1,7 @@
 language: go
 go:
  - "1.10.x"
+ - tip
 
 
 env:
@@ -9,13 +10,10 @@ env:
 
 before_install:
  - cd ~
- - whereis cmake
- - which cmake
  - wget -O cmake.sh https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.sh
  - sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
  - export PATH=/usr/local/bin:$PATH
  - export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
- - cmake --version
  - wget http://downloads.sourceforge.net/swig/swig-${SWIG_VERSION}.tar.gz
  - tar -xzf swig-${SWIG_VERSION}.tar.gz
  - cd swig-${SWIG_VERSION}

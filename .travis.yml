@@ -5,13 +5,25 @@ go:
 
 env:
   global:
-    - CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz
+    - CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz1
+    - SWIG_VERSION=3.0.12
+
+before_install:
+ - wget -O cmake.sh https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.sh
+ - sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
+ - travis_retry wget http://downloads.sourceforge.net/swig/swig-${SWIG_VERSION}.tar.gz
+ - tar -xzf swig-${SWIG_VERSION}.tar.gz
+ - cd swig-${SWIG_VERSION}
+ - ./configure >/dev/null
+ - make -j8 >/dev/null
+ - sudo make install
 
 install:
  - go get -u -d gopkg.in/virgilsecurity/virgil-crypto-go.v5
- - wget https://cdn.virgilsecurity.com/virgil-crypto/go/$CRYPTO_LIB
- - tar -xvf $CRYPTO_LIB --strip-components=1 -C $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/
+ - cd $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/
+ - make
 
 script:
+ - cd $(go env GOPATH)/src/github.com/VirgilSecurity/pythia-go
  - go get -t -v ./...
  - go test -v ./...

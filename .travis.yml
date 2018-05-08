@@ -7,21 +7,17 @@ env:
   global:
     - CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz1
     - SWIG_VERSION=3.0.12
-    - CMAKE_VERSION=3.11.1
 
 before_install:
- - wget https://cmake.org/files/v${CMAKE_VERSION%.*}/cmake-${CMAKE_VERSION}.tar.gz
- - tar xvfz cmake-${CMAKE_VERSION}.tar.gz
- - cd cmake-${CMAKE_VERSION}
- - ./bootstrap
- - make -j8 >/dev/null
- - sudo make install >/dev/null
+ - whereis cmake
+ - wget -O cmake.sh https://cmake.org/files/v3.11/cmake-3.11.1-Linux-x86_64.sh
+ - sudo sh cmake.sh --skip-license --exclude-subdir --prefix=/usr/local
  - wget http://downloads.sourceforge.net/swig/swig-${SWIG_VERSION}.tar.gz
  - tar -xzf swig-${SWIG_VERSION}.tar.gz
  - cd swig-${SWIG_VERSION}
  - ./configure >/dev/null
  - make -j8 >/dev/null
- - sudo make install>/dev/null
+ - sudo make install
 
 install:
  - go get -u -d gopkg.in/virgilsecurity/virgil-crypto-go.v5

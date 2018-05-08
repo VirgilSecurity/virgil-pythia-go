@@ -41,11 +41,11 @@ make
 **The second**, if you use Linux x64 or Darwin x64 architecture, you can use the pre-built crypto binaries
 for Linux:
 ```bash
-CRYPTO_LIB=virgil-crypto-2.4.0-go-linux-x86_64.tgz
+CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz
 ```
 or for MacOS:
 ```bash
-CRYPTO_LIB=virgil-crypto-2.4.0-go-darwin-17.4-x86_64.tgz
+CRYPTO_LIB=virgil-crypto-2.4.3-go-darwin-17.4-x86_64.tgz
 ```
 
 and then install the library:

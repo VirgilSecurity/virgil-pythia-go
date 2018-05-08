@@ -9,7 +9,7 @@ env:
 
 install:
  - go get -u -d gopkg.in/virgilsecurity/virgil-crypto-go.v5
- - wget https://cdn.virgilsecurity.com/crypto-go/$CRYPTO_LIB
+ - wget https://cdn.virgilsecurity.com/virgil-crypto/go/$CRYPTO_LIB
  - tar -xvf $CRYPTO_LIB --strip-components=1 -C $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/
 
 script:

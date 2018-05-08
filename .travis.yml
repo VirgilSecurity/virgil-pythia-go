@@ -7,7 +7,7 @@ env:
   global:
     - CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz
 
-before_script:
+install:
  - go get -u -d gopkg.in/virgilsecurity/virgil-crypto-go.v5
  - wget https://cdn.virgilsecurity.com/crypto-go/$CRYPTO_LIB
  - tar -xvf $CRYPTO_LIB --strip-components=1 -C $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/

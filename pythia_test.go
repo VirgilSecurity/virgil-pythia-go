@@ -57,6 +57,9 @@ func initTestContext(proofKeysArgName string) (*Protocol, error) {
 	}
 
 	ctx, err := CreateContext(apiKey, apikeyId, appId, proofKeys...)
+	if err != nil {
+		return nil, err
+	}
 	ctx.Client.ServiceURL = apiUrl
 
 	if err != nil {
@@ -67,7 +70,7 @@ func initTestContext(proofKeysArgName string) (*Protocol, error) {
 	return pythia, nil
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdate1(t *testing.T) {
 
 	pythia1, err := initTestContext("PROOF_KEYS_1")
 
@@ -92,5 +95,53 @@ func TestUpdate(t *testing.T) {
 	time.Sleep(time.Second * 2)
 	err = pythia2.VerifyBreachProofPassword("some password", bpp2, false)
 	assert.NoError(t, err)
+
+}
+
+func TestUpdate2(t *testing.T) {
+
+	pythia1, err := initTestContext("PROOF_KEYS_2")
+
+	assert.NoError(t, err)
+
+	bpp1, err := pythia1.CreateBreachProofPassword("some password")
+	assert.NoError(t, err)
+
+	bpp2, err := pythia1.UpdateBreachProofPassword(os.Getenv("UPDATE_TOKEN"), bpp1)
+
+	assert.Nil(t, bpp2)
+	assert.Error(t,err)
+
+}
+
+func TestUpdate3(t *testing.T) {
+
+	pythia1, err := initTestContext("PROOF_KEYS_3")
+
+	assert.NoError(t, err)
+
+	bpp1, err := pythia1.CreateBreachProofPassword("some password")
+	assert.NoError(t, err)
+
+	bpp2, err := pythia1.UpdateBreachProofPassword(os.Getenv("UPDATE_TOKEN"), bpp1)
+
+	assert.Nil(t, bpp2)
+	assert.Error(t,err)
+
+}
+
+func TestUpdate4(t *testing.T) {
+
+	pythia1, err := initTestContext("PROOF_KEYS_3")
+
+	assert.NoError(t, err)
+
+	bpp1, err := pythia1.CreateBreachProofPassword("some password")
+	assert.NoError(t, err)
+
+	bpp2, err := pythia1.UpdateBreachProofPassword("PK.2.3.AGnR4LLnbBIDoPxy3OftLiw4tqRYd0NtRlvsM4dH0hlT", bpp1)
+
+	assert.Nil(t, bpp2)
+	assert.Error(t,err)
 
 }

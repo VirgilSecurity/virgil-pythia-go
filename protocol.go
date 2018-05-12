@@ -67,12 +67,12 @@ func New(params *Context) *Protocol {
 	}
 }
 
-func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofPassword, prove bool) (err error) {
+func (p *Protocol) VerifyBreachProofPassword(password string, pwd *BreachProofPassword, prove bool) (err error) {
 	if err := p.selfCheck(); err != nil {
 		return err
 	}
 
-	if err := p.userCheck(user); err != nil {
+	if err := p.pwdCheck(pwd); err != nil {
 		return err
 	}
 	tokenContext := &sdk.TokenContext{Identity: "", Operation: "verify", Service: "Pythia"}
@@ -86,7 +86,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofP
 		return err
 	}
 
-	protected, err := p.getClient().ProtectPassword(user.Salt, blindedPassword, user.Version, prove, token.String())
+	protected, err := p.getClient().ProtectPassword(pwd.Salt, blindedPassword, pwd.Version, prove, token.String())
 
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofP
 
 	if prove {
 
-		if err := p.verify(protected, user.Version, blindedPassword, user.Salt); err != nil {
+		if err := p.verify(protected, pwd.Version, blindedPassword, pwd.Salt); err != nil {
 			return err
 		}
 
@@ -106,7 +106,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, user *BreachProofP
 		return err
 	}
 
-	if subtle.ConstantTimeCompare(deblinded, user.DeblindedPassword) != 1 {
+	if subtle.ConstantTimeCompare(deblinded, pwd.DeblindedPassword) != 1 {
 		return errors.New("authentication failed")
 	}
 
@@ -159,7 +159,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 	}, nil
 }
 
-func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachProofPassword) (*BreachProofPassword, error) {
+func (p *Protocol) UpdateBreachProofPassword(updateToken string, pwd *BreachProofPassword) (*BreachProofPassword, error) {
 
 	if err := p.selfCheck(); err != nil {
 		return nil, err
@@ -170,15 +170,15 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachPro
 		return nil, err
 	}
 
-	if user.Version == newVersion {
+	if pwd.Version == newVersion {
 		return nil, errors.New("this user has already been updated")
 	}
 
-	if user.Version != oldVersion {
-		return nil, errors.New("user's version does not match this update token")
+	if pwd.Version != oldVersion {
+		return nil, errors.New("password's version does not match this update token")
 	}
 
-	if err = p.userCheck(user); err != nil {
+	if err = p.pwdCheck(pwd); err != nil {
 		return nil, err
 	}
 
@@ -186,13 +186,13 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, user *BreachPro
 		return nil, err
 	}
 
-	newDeblinded, err := p.Pythia.UpdateDeblindedWithToken(user.DeblindedPassword, token)
+	newDeblinded, err := p.Pythia.UpdateDeblindedWithToken(pwd.DeblindedPassword, token)
 	if err != nil {
 		return nil, err
 	}
 
-	newSalt := make([]byte, len(user.Salt))
-	copy(newSalt, user.Salt)
+	newSalt := make([]byte, len(pwd.Salt))
+	copy(newSalt, pwd.Salt)
 
 	return &BreachProofPassword{
 		DeblindedPassword: newDeblinded,
@@ -278,12 +278,12 @@ func (c *Protocol) getClient() *Client {
 	return c.Client
 }
 
-func (p *Protocol) userCheck(user *BreachProofPassword) error {
-	if user == nil {
-		return errors.New("user is nil")
+func (p *Protocol) pwdCheck(pwd *BreachProofPassword) error {
+	if pwd == nil {
+		return errors.New("pwd is nil")
 	}
-	if len(user.Salt) == 0 || len(user.DeblindedPassword) == 0 {
-		return errors.New("user object does not have salt or deblindedPassword set")
+	if len(pwd.Salt) == 0 || len(pwd.DeblindedPassword) == 0 {
+		return errors.New("pwd object does not have salt or deblindedPassword set")
 	}
 	return nil
 }

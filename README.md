@@ -1,5 +1,5 @@
 # Virgil Pythia Go SDK
-[![Build Status](https://travis-ci.org/go-virgil/virgil.png?branch=v5)](https://travis-ci.org/go-virgil/virgil)
+[![Build Status](https://travis-ci.org/VirgilSecurity/pythia-go.png?branch=master)](https://travis-ci.org/VirgilSecurity/pythia-go)
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 
 
@@ -41,11 +41,11 @@ make
 **The second**, if you use Linux x64 or Darwin x64 architecture, you can use the pre-built crypto binaries
 for Linux:
 ```bash
-CRYPTO_LIB=virgil-crypto-2.4.0-go-linux-x86_64.tgz
+CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz
 ```
 or for MacOS:
 ```bash
-CRYPTO_LIB=virgil-crypto-2.4.0-go-darwin-17.4-x86_64.tgz
+CRYPTO_LIB=virgil-crypto-2.4.3-go-darwin-17.4-x86_64.tgz
 ```
 
 and then install the library:
@@ -64,7 +64,7 @@ go get -u github.com/VirgilSecurity/pythia-go
 ```
 
 ### Configure SDK
-When you create a Pythia Application on the [Virgil Dashboard](https://dashboard.virgilsecurity.com/) you will receive Application credentials including: Proof Key and App ID. Specify your Pythia Application and Virgil account credentials in a Pythia SDK class instance.
+When you create a Pythia Application on the [Virgil Dashboard][_dashboard] you will receive Application credentials including: Proof Key and App ID. Specify your Pythia Application and Virgil account credentials in a Pythia SDK class instance.
 These credentials are used for the following purposes:
 - generating a JWT token that is used for authorization on the Virgil Services
 - creating a user's breach-proof password
@@ -211,7 +211,7 @@ Virgil Security has a powerful set of APIs, and the documentation below can get 
 
 ## License
 
-This library is released under the [3-clause BSD License](LICENSE).
+This library is released under the [3-clause BSD License](LICENSE.md).
 
 ## Support
 Our developer support team is here to help you. Find out more information on our [Help Center](https://help.virgilsecurity.com/).

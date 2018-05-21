@@ -32,35 +32,30 @@
 
 package pythia
 
-type PasswordReq struct {
-	BlindedPassword []byte `json:"blinded_password"`
-	IncludeProof    bool   `json:"include_proof"`
-	Version         uint   `json:"version"`
-	UserId          []byte `json:"user_id"`
+import (
+	"gopkg.in/virgil.v5/errors"
+	"gopkg.in/virgil.v5/sdk"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v5/pythia"
+)
+
+type BrainKeyContext struct {
+	Provider    sdk.AccessTokenProvider
+	Client      *Client
+	Pythia      *pythia.Pythia
+	KeypairType virgil_crypto_go.KeyType
 }
 
-type SeedReq struct {
-	BlindedPassword []byte `json:"blinded_password"`
-	BrainKeyId      string `json:"brainkey_id"`
-}
+func CreateBrainKeyContext(accessTokenProvider sdk.AccessTokenProvider) (*BrainKeyContext, error) {
 
-type SeedResp struct {
-	Seed []byte `json:"seed"`
-}
+	if accessTokenProvider == nil {
+		return nil, errors.New("all parameters are mandatory")
+	}
 
-//
-// PasswordResp is model for getting transform response
-//
-type PasswordResp struct {
-	TransformedPassword []byte `json:"transformed_password"`
-	Version             uint   `json:"version"`
-	Proof               *Proof `json:"proof,omitempty"`
-}
-
-//
-// Proof contains all necessary parameters for transformation correctness
-//
-type Proof struct {
-	ValueC []byte `json:"value_c"`
-	ValueU []byte `json:"value_u"`
+	return &BrainKeyContext{
+		KeypairType: virgil_crypto_go.Default,
+		Client:      NewClient(""),
+		Pythia:      pythia.New(),
+		Provider:    accessTokenProvider,
+	}, nil
 }

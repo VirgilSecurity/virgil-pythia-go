@@ -86,7 +86,7 @@ func (p *Protocol) VerifyBreachProofPassword(password string, pwd *BreachProofPa
 		return err
 	}
 
-	protected, err := p.getClient().ProtectPassword(pwd.Salt, blindedPassword, pwd.Version, prove, token.String())
+	protected, err := p.getClient().TransformPassword(pwd.Salt, blindedPassword, pwd.Version, prove, token.String())
 
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (p *Protocol) CreateBreachProofPassword(password string) (*BreachProofPassw
 		return nil, err
 	}
 
-	protected, err := p.getClient().ProtectPassword(salt, blindedPassword, proofKey.Version, true, token.String())
+	protected, err := p.getClient().TransformPassword(salt, blindedPassword, proofKey.Version, true, token.String())
 	if err != nil {
 		return nil, err
 	}

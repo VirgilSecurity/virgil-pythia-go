@@ -51,7 +51,7 @@ func NewClient(serviceURL string) *Client {
 	return &Client{ServiceURL: serviceURL}
 }
 
-func (c *Client) ProtectPassword(salt, blindedPassword []byte, version uint, includeProof bool, token string) (*PasswordResp, error) {
+func (c *Client) TransformPassword(salt, blindedPassword []byte, version uint, includeProof bool, token string) (*PasswordResp, error) {
 
 	req := &PasswordReq{
 		BlindedPassword: blindedPassword,
@@ -64,6 +64,23 @@ func (c *Client) ProtectPassword(salt, blindedPassword []byte, version uint, inc
 	_, err := c.send(http.MethodPost, "/pythia/v1/password", token, req, &resp)
 
 	return resp, err
+}
+
+func (c *Client) GenerateSeed(blindedPassword []byte, brainKeyId string, token string) ([]byte, error) {
+
+	req := &SeedReq{
+		BlindedPassword: blindedPassword,
+		BrainKeyId:      brainKeyId,
+	}
+
+	var resp *SeedResp
+	_, err := c.send(http.MethodPost, "/pythia/v1/brainkey", token, req, &resp)
+
+	var seed []byte
+	if resp != nil {
+		seed = resp.Seed
+	}
+	return seed, err
 }
 
 func (c *Client) send(method string, url string, token string, payload interface{}, respObj interface{}) (headers http.Header, err error) {

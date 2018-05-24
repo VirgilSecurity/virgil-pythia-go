@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"encoding/hex"
-	"fmt"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -69,7 +68,7 @@ func TestBrainKey_GenerateKeypair(t *testing.T) {
 	assert.NoError(t, err)
 	pk, err := crypto.ExportPublicKey(kp.PublicKey())
 	assert.NoError(t, err)
-	fmt.Println(hex.EncodeToString(sk))
-	fmt.Println(hex.EncodeToString(pk))
 
+	assert.Equal(t, "302e020100300506032b6570042204209785a00bff9571c34a36889b3e7d7c4a74e0cfff4211365055291e55e39eb2a3", hex.EncodeToString(sk))
+	assert.Equal(t, "302a300506032b65700321002f80478a0784a25ba91962bb3cca4a6b2eaf370419439894183fe8ead1941583", hex.EncodeToString(pk))
 }

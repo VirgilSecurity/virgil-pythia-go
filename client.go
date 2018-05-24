@@ -85,10 +85,10 @@ func (c *Client) GenerateSeed(blindedPassword []byte, brainKeyId string, token s
 
 func (c *Client) send(method string, url string, token string, payload interface{}, respObj interface{}) (headers http.Header, err error) {
 	client := c.getVirgilClient()
-	headers, err = client.Send(method, url, token, payload, respObj)
+	headers, httpCode, err := client.Send(method, url, token, payload, respObj)
 	if err != nil {
 		if apiErr, ok := err.(common.VirgilAPIError); ok {
-			return headers, errors.NewServiceError(apiErr.Code, 0, apiErr.Message)
+			return headers, errors.NewServiceError(apiErr.Code, httpCode, apiErr.Message)
 		}
 		return headers, err
 	}

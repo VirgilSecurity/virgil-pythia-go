@@ -41,18 +41,18 @@ make
 **The second**, if you use Linux x64 or Darwin x64 architecture, you can use the pre-built crypto binaries
 for Linux:
 ```bash
-CRYPTO_LIB=virgil-crypto-2.4.3-go-linux-x86_64.tgz
+CRYPTO_LIB=virgil-crypto-2.4.4-go-linux-x86_64.tgz
 ```
 or for MacOS:
 ```bash
-CRYPTO_LIB=virgil-crypto-2.4.3-go-darwin-17.4-x86_64.tgz
+CRYPTO_LIB=virgil-crypto-2.4.4-go-darwin-17.5-x86_64.tgz
 ```
 
 and then install the library:
 
 ```bash
 go get -u -d gopkg.in/virgilsecurity/virgil-crypto-go.v5
-wget https://cdn.virgilsecurity.com/crypto-go/$CRYPTO_LIB
+wget https://cdn.virgilsecurity.com/virgil-crypto/go/$CRYPTO_LIB
 tar -xvf $CRYPTO_LIB --strip-components=1 -C $(go env GOPATH)/src/gopkg.in/virgilsecurity/virgil-crypto-go.v5/
 ```
 

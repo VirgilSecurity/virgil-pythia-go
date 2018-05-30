@@ -7,13 +7,17 @@
 
 ## Introduction
 
-<a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which lets you implement Pythia protocol. 
-Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
+<a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which allows you to communicate with Virgil Pythia Service and implement Pythia protocol for the following use cases: 
+- **Breach-proof password**. Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
+- **BrainKey**. User's Private Key which is based on user's password. BrainKey can be easily restored and is resistant to online and offline attacks.
+
+In both cases you get the mechanism which assures you that neither Virgil nor attackers know anything about user's password.
 
 ## SDK Features
 - communicate with Virgil Pythia Service
 - manage your Pythia application credentials
 - create, verify and update user's breach-proof password
+- generate user's BrainKey
 - use [Virgil Crypto Pythia library][_virgil_crypto_pythia]
 
 ## Install and configure SDK
@@ -91,6 +95,8 @@ func main() {
 
 ## Usage Examples
 
+### Breach-proof password
+
 Virgil Pythia SDK lets you easily perform all the necessary operations to create, verify and update user's breach-proof password without requiring any additional actions and use Virgil Crypto library.
 
 First of all, you need to set up your database to store users' breach-proof passwords. Create additional columns in your database for storing the following parameters:
@@ -133,7 +139,7 @@ Now we can start creating breach-proof passwords for users. Depending on the sit
 - `CreateBreachProofPassword` is used to create a user's breach-proof password on your Application Server.
 - `VerifyBreachProofPassword` is used to verify a user's breach-proof password.
 
-### Create Breach-Proof Password
+#### Create Breach-Proof Password
 
 Use this flow to create a new breach-proof password for a user.
 
@@ -158,7 +164,7 @@ After performing `CreateBreachProofPassword` function you get previously mention
 
 Check that you updated all database records and delete the now unnecessary column where user passwords were previously stored.
 
-### Verify Breach-Proof Password
+#### Verify Breach-Proof Password
 
 Use this flow when a user already has his or her own breach-proof password in your database. You will have to pass his or her password into an `VerifyBreachProofPassword` function:
 
@@ -177,7 +183,7 @@ if err != nil{
 
 The difference between the `VerifyBreachProofPassword` and `CreateBreachProofPassword` functions is that the verification of Pythia Service is optional in `VerifyBreachProofPassword` function, which allows you to achieve maximum performance when processing data. You can turn on a proof step in `VerifyBreachProofPassword` function if you have any suspicions that a user or Pythia Service were compromised.
 
-### Update breach-proof passwords
+#### Update breach-proof passwords
 
 This step will allow you to use an `updateToken` in order to update users' breach-proof passwords in your database.
 
@@ -200,6 +206,74 @@ Here is an example of using the `UpdateBreachProofPassword` function:
 // update previous user's deblindedPassword and version, and save new one into your DB
 updatedPwd, err := pythia.UpdateBreachProofPassword("UT.1.2.UPDATE_TOKEN", pwd)
 fmt.Println(updatedPwd.DeblindedPassword, updatedPwd.Version)
+```
+
+### BrainKey
+
+#### Generate BrainKey
+
+```go
+package main
+
+import (
+    "github.com/VirgilSecurity/pythia-go"
+    "gopkg.in/virgilsecurity/virgil-crypto-go.v5"
+    "gopkg.in/virgil.v5/sdk"
+    "time"
+    "fmt"
+)
+
+func main(){
+
+
+    // 1. Specify your JWT provider
+    crypto := virgil_crypto_go.NewVirgilCrypto()
+    apiPrivateKey, err := crypto.ImportPrivateKey([]byte("API_KEY"), "")
+    if err != nil {
+        panic(err)
+    }
+    generator := sdk.NewJwtGenerator(apiPrivateKey, "API_KEY_ID", virgil_crypto_go.NewVirgilAccessTokenSigner(), "APP_ID", time.Hour)
+    accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (*sdk.Jwt, error) {
+        jwt, err := generator.GenerateToken("USER_IDENTITY", nil)
+        if err != nil {
+            return nil, err
+        }
+        return jwt, nil
+    })
+
+    // 2. Setup BrainKey
+    ctx, err := pythia.CreateBrainKeyContext(accessTokenProvider)
+    if err != nil {
+        panic(err)
+    }
+    brainkey := pythia.NewBrainKey(ctx)
+
+    //3. Generate keypair
+    keypair, err := brainkey.GenerateKeypair("Your password","default")
+    if err != nil {
+        panic(err)
+    }
+
+    /// 4. Publish user's on the Cards Service
+
+    cardManager, err := sdk.NewCardManager(&sdk.CardManagerParams{/*initialize cardManager here*/})
+    if err != nil {
+        panic(err)
+    }
+
+    card, err := cardManager.PublishCard(&sdk.CardParams{
+        PublicKey:keypair.PublicKey(),
+        PrivateKey:keypair.PrivateKey(),
+        Identity: "USER_IDENTITY",
+    })
+
+    if err != nil {
+        panic(err)
+    }
+
+    fmt.Println(card.Id)
+
+}
 ```
 
 ## Docs

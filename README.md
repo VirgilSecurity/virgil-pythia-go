@@ -8,7 +8,7 @@
 ## Introduction
 
 <a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which allows you to communicate with Virgil Pythia Service and implement Pythia protocol for the following use cases: 
-- **Breach-proof password**. Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
+- **Breach-proof password**. Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords in your database and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
 - **BrainKey**. User's Private Key which is based on user's password. BrainKey can be easily restored and is resistant to online and offline attacks.
 
 In both cases you get the mechanism which assures you that neither Virgil nor attackers know anything about user's password.
@@ -146,8 +146,10 @@ Use this flow to create a new breach-proof password for a user.
 > Remember, if you already have a database with user passwords, you don't have to wait until a user logs in into your system to implement Pythia. You can go through your database and create breach-proof user passwords at any time.
 
 So, in order to create a user's breach-proof password for a new database or available one, go through the following operations:
-- Take a user's password (or its hash or whatever you use) and pass it into a `CreateBreachProofPassword` function in SDK.
-- Pythia SDK will blind a password, send a request to Pythia Service to get a transformed blinded password and de-blind the transformed blinded password into a user's deblinded password (breach-proof password).
+- Take a user's password (or its hash or whatever you use) and pass it into a `CreateBreachProofPassword` function in SDK on your Server side.
+- Pythia SDK generates unique user's **salt** and **version** (which is the same for every user until you change your app credentials on Pythia Service). You need to store user's salt and version in your database in associated columns created on previous step.
+- Pythia SDK blinds a password and sends a request to Pythia Service to get a **transformed blinded password**.
+- Pythia SDK de-blinds the transformed blinded password into a user's **deblinded password** (that we call **breach-proof password**).
 
 ```go
 // create a new Breach-proof password using user's password or its hash
@@ -166,7 +168,7 @@ Check that you updated all database records and delete the now unnecessary colum
 
 #### Verify Breach-Proof Password
 
-Use this flow when a user already has his or her own breach-proof password in your database. You will have to pass his or her password into an `VerifyBreachProofPassword` function:
+Use this flow on Server side when a user already has his or her own breach-proof password in your database. You will have to pass his or her password into an `VerifyBreachProofPassword` function:
 
 ```go
 //get user's Breach-proof password parameters from your users DB
@@ -190,10 +192,10 @@ This step will allow you to use an `updateToken` in order to update users' breac
 > Use this flow only if your database was COMPROMISED.
 
 How it works:
-- Access your Virgil Dashboard and press the "My Database Was Compromised" button.
+- Access your [Virgil Dashboard][_dashboard] and press the "My Database Was Compromised" button.
 - Pythia Service generates a special updateToken and new Proof Key.
 - You then specify new Pythia Application credentials in the Pythia SDK on your Server side.
-- Then you use `UpdateBreachProofPassword` function to create new breach-proof passwords for your users.
+- Then you use `UpdateBreachProofPassword` function to create new breach-proof passwords for your users (you don't need to regenerate user's password).
 - Finally, you save the new breach-proof passwords into your database.
 
 Here is an example of using the `UpdateBreachProofPassword` function:
@@ -210,7 +212,24 @@ fmt.Println(updatedPwd.DeblindedPassword, updatedPwd.Version)
 
 ### BrainKey
 
+*PYTHIA* Service can be used directly as a means to generate strong cryptographic keys based on user's **password**. We call these keys the **BrainKeys**. Thus when you need to restore a Private Key you use only user's Password and Pythia Service.
+
 #### Generate BrainKey
+
+Use this flow to generate a new BrainKey for a user.
+
+In order to create a user's BrainKey, go through the following operations:
+- Register your E2EE application on [Virgil Dashboard][_dashboard] and get your app credentials
+- Generate your API key or use available
+- Set up **JWT provider** using previously mentioned parameters (**App ID, API key, API key ID**) on the Server side
+- Generate JWT token with **user's identity** inside and transmit it to Client side (user's side)
+- On Client side set up **access token provider** in order to specify JWT provider
+- Setup BrainKey function with access token provider and pass user's password 
+- Send BrainKey request to Pythia Service
+- Generate keypair based on BrainKey that you've got from Pythia Service and create user's Card 
+- Pass user's Card to cardManager
+- Publish user's Card that is related to the BrainKey
+
 
 ```go
 package main
@@ -254,7 +273,7 @@ func main(){
         panic(err)
     }
 
-    /// 4. Publish user's on the Cards Service
+    /// 4. Publish user's BrainKey Card on the Cards Service
 
     cardManager, err := sdk.NewCardManager(&sdk.CardManagerParams{/*initialize cardManager here*/})
     if err != nil {

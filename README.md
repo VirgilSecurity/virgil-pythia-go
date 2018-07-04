@@ -300,7 +300,7 @@ Virgil Security has a powerful set of APIs, and the documentation below can get 
 
 * [Breach-Proof Password][_pythia_use_case] Use Case
 * [The Pythia PRF Service](https://eprint.iacr.org/2015/644.pdf) - foundation principles of the protocol
-* [Virgil Security Documenation][_documentation]
+* [Virgil Security Documentation][_documentation]
 
 ## License
 

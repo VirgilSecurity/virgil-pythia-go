@@ -44,9 +44,9 @@ import (
 	"strconv"
 	"strings"
 
-	"gopkg.in/virgil.v5/errors"
-	"gopkg.in/virgil.v5/sdk"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5/pythia"
+	"gopkg.in/virgil.v4/errors"
+	"gopkg.in/virgilsecurity/pythia-go.v4/sdk"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v4/pythia"
 )
 
 type Protocol struct {
@@ -60,10 +60,10 @@ type Protocol struct {
 func New(params *Context) *Protocol {
 
 	return &Protocol{
-		AccessTokenProvider: params.Provider,
 		Client:              params.Client,
 		ProofKeys:           params.ProofKeys,
 		Pythia:              params.Crypto,
+		AccessTokenProvider: params.Provider,
 	}
 }
 

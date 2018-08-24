@@ -36,8 +36,8 @@ import (
 	"net/http"
 	"sync"
 
-	"gopkg.in/virgil.v5/common"
-	"gopkg.in/virgil.v5/errors"
+	"gopkg.in/virgil.v4/errors"
+	"gopkg.in/virgilsecurity/pythia-go.v4/common"
 )
 
 type Client struct {

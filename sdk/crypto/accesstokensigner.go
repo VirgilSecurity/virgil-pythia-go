@@ -30,32 +30,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package pythia
+package crypto
 
 import (
-	"gopkg.in/virgil.v5/errors"
-	"gopkg.in/virgil.v5/sdk"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5/pythia"
+	"gopkg.in/virgil.v4/virgilcrypto"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v4"
 )
 
-type BrainKeyContext struct {
-	Provider    sdk.AccessTokenProvider
-	Client      *Client
-	Pythia      *pythia.Pythia
-	KeypairType virgil_crypto_go.KeyType
+type VirgilAccessTokenSigner struct {
+	Crypto *virgil_crypto_go.NativeCrypto
 }
 
-func CreateBrainKeyContext(accessTokenProvider sdk.AccessTokenProvider) (*BrainKeyContext, error) {
+func NewVirgilAccessTokenSigner() *VirgilAccessTokenSigner {
+	return &VirgilAccessTokenSigner{Crypto: &virgil_crypto_go.NativeCrypto{}}
+}
 
-	if accessTokenProvider == nil {
-		return nil, errors.New("all parameters are mandatory")
-	}
+func (t *VirgilAccessTokenSigner) GenerateTokenSignature(data []byte, privateKey virgilcrypto.PrivateKey) ([]byte, error) {
+	return t.Crypto.SignSHA512(data, privateKey)
 
-	return &BrainKeyContext{
-		KeypairType: virgil_crypto_go.Default,
-		Client:      NewClient(""),
-		Pythia:      pythia.New(),
-		Provider:    accessTokenProvider,
-	}, nil
+}
+func (t *VirgilAccessTokenSigner) GetAlgorithm() string {
+	return "VEDS512"
 }

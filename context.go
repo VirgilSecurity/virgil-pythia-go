@@ -36,9 +36,10 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"gopkg.in/virgil.v5/sdk"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5"
-	"gopkg.in/virgilsecurity/virgil-crypto-go.v5/pythia"
+	"gopkg.in/virgilsecurity/pythia-go.v4/sdk"
+	crypto2 "gopkg.in/virgilsecurity/pythia-go.v4/sdk/crypto"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v4"
+	"gopkg.in/virgilsecurity/virgil-crypto-go.v4/pythia"
 )
 
 type Context struct {
@@ -62,7 +63,7 @@ func CreateContext(apiKey, apiKeyID, appID string, proofKeys ...string) (*Contex
 	client := NewClient("")
 
 	pythiaCrypto := pythia.New()
-	crypto := virgil_crypto_go.NewVirgilCrypto()
+	crypto := &virgil_crypto_go.NativeCrypto{}
 
 	apiPrivateKey, err := crypto.ImportPrivateKey([]byte(apiKey), "")
 
@@ -70,7 +71,7 @@ func CreateContext(apiKey, apiKeyID, appID string, proofKeys ...string) (*Contex
 		return nil, err
 	}
 
-	generator := sdk.NewJwtGenerator(apiPrivateKey, apiKeyID, virgil_crypto_go.NewVirgilAccessTokenSigner(), appID, time.Hour)
+	generator := sdk.NewJwtGenerator(apiPrivateKey, apiKeyID, crypto2.NewVirgilAccessTokenSigner(), appID, time.Hour)
 	accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (*sdk.Jwt, error) {
 		jwt, err := generator.GenerateToken("PYTHIA-CLIENT", nil)
 		if err != nil {

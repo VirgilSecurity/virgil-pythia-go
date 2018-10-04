@@ -35,13 +35,31 @@
 package pythia
 
 import (
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 )
+
+func TestThrottle(t *testing.T) {
+
+	pythia1, err := initTestContext("PROOF_KEYS_2")
+
+	assert.NoError(t, err)
+
+	var bpp *BreachProofPassword
+
+	for i := 0; i < 10; i++ {
+		bpp, err = pythia1.CreateBreachProofPassword("some password")
+		assert.NoError(t, err)
+	}
+
+	err = pythia1.VerifyBreachProofPassword("some password", bpp, false)
+	assert.Error(t, err)
+}
 
 func initTestContext(proofKeysArgName string) (*Protocol, error) {
 	apiUrl := os.Getenv("TEST_ADDRESS")
@@ -110,7 +128,7 @@ func TestUpdate2(t *testing.T) {
 	bpp2, err := pythia1.UpdateBreachProofPassword(os.Getenv("UPDATE_TOKEN"), bpp1)
 
 	assert.Nil(t, bpp2)
-	assert.Error(t,err)
+	assert.Error(t, err)
 
 }
 
@@ -126,7 +144,7 @@ func TestUpdate3(t *testing.T) {
 	bpp2, err := pythia1.UpdateBreachProofPassword(os.Getenv("UPDATE_TOKEN"), bpp1)
 
 	assert.Nil(t, bpp2)
-	assert.Error(t,err)
+	assert.Error(t, err)
 
 }
 
@@ -142,6 +160,6 @@ func TestUpdate4(t *testing.T) {
 	bpp2, err := pythia1.UpdateBreachProofPassword("PK.2.3.AGnR4LLnbBIDoPxy3OftLiw4tqRYd0NtRlvsM4dH0hlT", bpp1)
 
 	assert.Nil(t, bpp2)
-	assert.Error(t,err)
+	assert.Error(t, err)
 
 }

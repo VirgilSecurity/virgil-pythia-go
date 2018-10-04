@@ -55,6 +55,11 @@ func TestThrottle(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		bpp, err = pythia1.CreateBreachProofPassword("some password")
 		assert.NoError(t, err)
+		bpp2, err := pythia1.CreateBreachProofPassword("some password")
+		assert.NoError(t, err)
+		assert.NotEqual(t, bpp.Salt, bpp2.Salt)
+		assert.NotEqual(t, bpp.DeblindedPassword, bpp2.DeblindedPassword)
+		assert.Equal(t, bpp.Version, bpp2.Version)
 	}
 
 	err = pythia1.VerifyBreachProofPassword("some password", bpp, false)

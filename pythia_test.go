@@ -52,7 +52,7 @@ func TestThrottle(t *testing.T) {
 
 	var bpp *BreachProofPassword
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 2; i++ {
 		bpp, err = pythia1.CreateBreachProofPassword("some password")
 		assert.NoError(t, err)
 		bpp2, err := pythia1.CreateBreachProofPassword("some password")
@@ -144,7 +144,7 @@ func TestUpdate3(t *testing.T) {
 	assert.NoError(t, err)
 
 	bpp1, err := pythia1.CreateBreachProofPassword("some password")
-	assert.NoError(t, err)
+	assert.Error(t, err)
 
 	bpp2, err := pythia1.UpdateBreachProofPassword(os.Getenv("UPDATE_TOKEN"), bpp1)
 
@@ -155,7 +155,7 @@ func TestUpdate3(t *testing.T) {
 
 func TestUpdate4(t *testing.T) {
 
-	pythia1, err := initTestContext("PROOF_KEYS_3")
+	pythia1, err := initTestContext("PROOF_KEYS_1")
 
 	assert.NoError(t, err)
 

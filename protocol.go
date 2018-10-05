@@ -165,6 +165,10 @@ func (p *Protocol) UpdateBreachProofPassword(updateToken string, pwd *BreachProo
 		return nil, err
 	}
 
+	if pwd == nil {
+		return nil, errors.New("pwd is nil")
+	}
+
 	oldVersion, newVersion, token, err := parseToken(updateToken)
 	if err != nil {
 		return nil, err

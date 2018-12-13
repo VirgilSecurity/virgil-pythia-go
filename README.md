@@ -1,5 +1,5 @@
 # Virgil Pythia Go SDK
-[![Build Status](https://travis-ci.org/VirgilSecurity/pythia-go.png?branch=master)](https://travis-ci.org/VirgilSecurity/pythia-go)
+[![Build Status](https://travis-ci.org/VirgilSecurity/virgil-pythia-go.png?branch=master)](https://travis-ci.org/VirgilSecurity/virgil-pythia-go)
 [![GitHub license](https://img.shields.io/badge/license-BSD%203--Clause-blue.svg)](https://github.com/VirgilSecurity/virgil/blob/master/LICENSE)
 
 
@@ -22,12 +22,12 @@ In both cases you get the mechanism which assures you that neither Virgil nor at
 
 ## Install and configure SDK
 
-The Virgil Pythia Go SDK is provided as a package named pythia-go. The package is distributed via GitHub.
+The Virgil Pythia Go SDK is provided as a package named virgil-pythia-go. The package is distributed via GitHub.
 The package is available for Go 1.10 or newer.
 
 ### Install SDK Package
 
-Virgil Pythia SDK uses the Virgil Crypto library to perform cryptographic operations. The Virgil Pythia Go SDK is provided as a package named pythia-go. The package is distributed via GitHub.
+Virgil Pythia SDK uses the Virgil Crypto library to perform cryptographic operations. The Virgil Pythia Go SDK is provided as a package named virgil-pythia-go. The package is distributed via GitHub.
 The package is available for Go 1.10 or newer.
 
 #### Step #1. Install a Crypto Library (C++)
@@ -64,7 +64,7 @@ tar -xvf $CRYPTO_LIB --strip-components=1 -C $(go env GOPATH)/src/gopkg.in/virgi
 
 Install Pythia SDK library with the following code:
 ```bash
-go get -u github.com/VirgilSecurity/pythia-go
+go get -u github.com/VirgilSecurity/virgil-pythia-go
 ```
 
 ### Configure SDK
@@ -78,7 +78,7 @@ Here is an example of how to specify your credentials SDK class instance:
 package main
 
 import (
-  "github.com/VirgilSecurity/pythia-go"
+  "github.com/VirgilSecurity/virgil-pythia-go"
 )
 
 
@@ -235,7 +235,7 @@ In order to create a user's BrainKey, go through the following operations:
 package main
 
 import (
-    "github.com/VirgilSecurity/pythia-go"
+    "github.com/VirgilSecurity/virgil-pythia-go"
     "gopkg.in/virgilsecurity/virgil-crypto-go.v5"
     "gopkg.in/virgil.v5/sdk"
     "time"

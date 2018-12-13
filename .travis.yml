@@ -1,6 +1,6 @@
 language: go
 go:
- - "1.10.x"
+ - stable
  - tip
 
 
@@ -27,6 +27,6 @@ install:
  - make
 
 script:
- - cd $(go env GOPATH)/src/github.com/VirgilSecurity/pythia-go
+ - cd $(go env GOPATH)/src/github.com/VirgilSecurity/virgil-pythia-go
  - go get -t -v ./...
  - go test -v -tags=integration ./...

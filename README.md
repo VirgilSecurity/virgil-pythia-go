@@ -276,7 +276,7 @@ Important notes for implementation:
 
 ```go
 ...
-    keypair, err := brainkey.GenerateKeypair("abcdef13803488","Optional User SSN",)
+    keypair, err := brainkey.GenerateKeypair("abcdef13803488","Optional User SSN")
     if err != nil {
         panic(err)
     }

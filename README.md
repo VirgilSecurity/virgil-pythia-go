@@ -249,7 +249,7 @@ func main(){
     // Generate default public/private keypair which is Curve ED25519
     // If you need to generate several BrainKeys for the same password,
     // use different IDs.
-    keypair, err := brainkey.GenerateKeypair("Your password","BrainKey id")
+    keypair, err := brainkey.GenerateKeypair("Your password","Optional BrainKey id")
     if err != nil {
         panic(err)
     }
@@ -276,7 +276,7 @@ Important notes for implementation:
 
 ```go
 ...
-    keypair, err := brainkey.GenerateKeypair("abcdef13803488","User SSN",)
+    keypair, err := brainkey.GenerateKeypair("abcdef13803488","Optional User SSN",)
     if err != nil {
         panic(err)
     }
@@ -284,6 +284,7 @@ Important notes for implementation:
     }
 ...
 ```
+> Note! if you don't need to use additional parameters, like "Optional User SSN", you can just omit it: `keypair, err := brainkey.GenerateKeypair("abcdef13803488")`
 
 
 ## Docs

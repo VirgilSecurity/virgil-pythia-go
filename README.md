@@ -7,7 +7,7 @@
 
 ## Introduction
 
-<a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which allows you to communicate with Virgil Pythia Service and implement Pythia protocol for the following use cases: 
+<a href="https://developer.virgilsecurity.com/docs"><img width="230px" src="https://cdn.virgilsecurity.com/assets/images/github/logos/virgil-logo-red.png" align="left" hspace="10" vspace="6"></a>[Virgil Security](https://virgilsecurity.com) provides an SDK which allows you to communicate with Virgil Pythia Service and implement Pythia protocol for the following use cases:
 - **Breach-proof password**. Pythia is a technology that gives you a new, more secure mechanism that "breach-proofs" user passwords in your database and lessens the security risks associated with weak passwords by providing cryptographic leverage for the defender (by eliminating offline password cracking attacks), detection for online attacks, and key rotation to recover from stolen password databases.
 - **BrainKey**. User's Private Key which is based on user's password. BrainKey can be easily restored and is resistant to online and offline attacks.
 
@@ -212,11 +212,7 @@ fmt.Println(updatedPwd.DeblindedPassword, updatedPwd.Version)
 
 ### BrainKey
 
-*PYTHIA* Service can be used directly as a means to generate strong cryptographic keys based on user's **password**. We call these keys the **BrainKeys**. Thus when you need to restore a Private Key you use only user's Password and Pythia Service.
-
-#### Generate BrainKey
-
-Use this flow to generate a new BrainKey for a user.
+*PYTHIA* Service can be used directly as a means to generate strong cryptographic keys based on user's **password** or other secret data. We call these keys the **BrainKeys**. Thus, when you need to restore a Private Key you use only user's Password and Pythia Service.
 
 In order to create a user's BrainKey, go through the following operations:
 - Register your E2EE application on [Virgil Dashboard][_dashboard] and get your app credentials
@@ -224,18 +220,17 @@ In order to create a user's BrainKey, go through the following operations:
 - Set up **JWT provider** using previously mentioned parameters (**App ID, API key, API key ID**) on the Server side
 - Generate JWT token with **user's identity** inside and transmit it to Client side (user's side)
 - On Client side set up **access token provider** in order to specify JWT provider
-- Setup BrainKey function with access token provider and pass user's password 
+- Setup BrainKey function with access token provider and pass user's password
 - Send BrainKey request to Pythia Service
-- Generate keypair based on BrainKey that you've got from Pythia Service and create user's Card 
-- Pass user's Card to cardManager
-- Publish user's Card that is related to the BrainKey
+- Generate a strong cryptographic keypair based on a user's password or other user's secret
 
 
+#### Generate BrainKey based on user's password
 ```go
 package main
 
 import (
-    "github.com/VirgilSecurity/virgil-pythia-go"
+    "github.com/VirgilSecurity/pythia-go"
     "gopkg.in/virgilsecurity/virgil-crypto-go.v5"
     "gopkg.in/virgil.v5/sdk"
     "time"
@@ -244,61 +239,59 @@ import (
 
 func main(){
 
-
-    // 1. Specify your JWT provider
-    crypto := virgil_crypto_go.NewVirgilCrypto()
-    apiPrivateKey, err := crypto.ImportPrivateKey([]byte("API_KEY"), "")
-    if err != nil {
-        panic(err)
-    }
-    generator := sdk.NewJwtGenerator(apiPrivateKey, "API_KEY_ID", virgil_crypto_go.NewVirgilAccessTokenSigner(), "APP_ID", time.Hour)
-    accessTokenProvider := sdk.NewCachingJwtProvider(func(context *sdk.TokenContext) (*sdk.Jwt, error) {
-        jwt, err := generator.GenerateToken("USER_IDENTITY", nil)
-        if err != nil {
-            return nil, err
-        }
-        return jwt, nil
-    })
-
-    // 2. Setup BrainKey
+    // Initialize and create an instance of BrainKey class
     ctx, err := pythia.CreateBrainKeyContext(accessTokenProvider)
     if err != nil {
         panic(err)
     }
     brainkey := pythia.NewBrainKey(ctx)
 
-    //3. Generate keypair
-    keypair, err := brainkey.GenerateKeypair("Your password","default")
+    // Generate default public/private keypair which is Curve ED25519
+    // If you need to generate several BrainKeys for the same password,
+    // use different IDs.
+    keypair, err := brainkey.GenerateKeypair("Your password","Optional BrainKey id")
     if err != nil {
         panic(err)
     }
-
-    /// 4. Publish user's BrainKey Card on the Cards Service
-
-    cardManager, err := sdk.NewCardManager(&sdk.CardManagerParams{/*initialize cardManager here*/})
-    if err != nil {
-        panic(err)
-    }
-
-    card, err := cardManager.PublishCard(&sdk.CardParams{
-        PublicKey:keypair.PublicKey(),
-        PrivateKey:keypair.PrivateKey(),
-        Identity: "USER_IDENTITY",
-    })
-
-    if err != nil {
-        panic(err)
-    }
-
-    fmt.Println(card.Id)
 
 }
 ```
+
+#### Generate BrainKey based on unique URL
+The typical BrainKey implementation uses a password or concatenated answers to security questions to regenerate the user’s private key. But a unique session link generated by the system admin can also do the trick.
+
+This typically makes the most sense for situations where it’s burdensome to require a password each time a user wants to send or receive messages, like single-session chats in a browser application.
+
+Here’s the general flow of how BrainKey can be used to regenerate a private key based on a unique URL:
+- When the user is ready to begin an encrypted messaging session, the application sends the user an SMS message
+- The SMS message contains a unique link like https://healthcare.app/?session=abcdef13803488
+- The string 'abcdef13803488' is used as a password for the private key regeneration
+- By clicking on the link, the user immediately establishes a secure session using their existing private key regenerated with Brainkey and does not need to input an additional password
+
+Important notes for implementation:
+- The link is one-time use only. When the user clicks on the link, the original link expires and cannot be used again, and so a new link has to be created for each new chat session.
+- All URL links must be short-lived (recommended lifetime is 1 minute).
+- The SMS messages should be sent over a different channel than the one the user will be using for the secure chat session.
+- If you’d like to add additional protection to ensure that the person clicking the link is the intended chat participant, users can be required to submit their name or any other security question. This answer will need to be built in as part of the BrainKey password.
+
+```go
+...
+    keypair, err := brainkey.GenerateKeypair("abcdef13803488","Optional User SSN")
+    if err != nil {
+        panic(err)
+    }
+
+    }
+...
+```
+> Note! if you don't need to use additional parameters, like "Optional User SSN", you can just omit it: `keypair, err := brainkey.GenerateKeypair("abcdef13803488")`
+
 
 ## Docs
 Virgil Security has a powerful set of APIs, and the documentation below can get you started today.
 
 * [Breach-Proof Password][_pythia_use_case] Use Case
+* [Brain Key][_brain_key_use_case] Use Case
 * [The Pythia PRF Service](https://eprint.iacr.org/2015/644.pdf) - foundation principles of the protocol
 * [Virgil Security Documentation][_documentation]
 
@@ -314,6 +307,7 @@ You can find us on [Twitter](https://twitter.com/VirgilSecurity) or send us emai
 Also, get extra help from our support team on [Slack](https://virgilsecurity.com/join-community).
 
 [_virgil_crypto_pythia]: https://github.com/VirgilSecurity/pythia
-[_pythia_use_case]: https://developer.virgilsecurity.com/docs/go/use-cases/v5/breach-proof-password
+[_brain_key_use_case]: https://developer.virgilsecurity.com/docs/use-cases/v1/brainkey
+[_pythia_use_case]: https://developer.virgilsecurity.com/docs/go/use-cases/v1/breach-proof-password
 [_documentation]: https://developer.virgilsecurity.com/
 [_dashboard]: https://dashboard.virgilsecurity.com/
